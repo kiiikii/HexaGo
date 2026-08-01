@@ -7,14 +7,15 @@ import (
 	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
 
 	//! Repository Block
-	userRepository := repository.NewUserRepository()
+	userRepository := repository.NewUserRepository(db)
 
 	//! Service Block
 	userService := service.NewUserService(userRepository)

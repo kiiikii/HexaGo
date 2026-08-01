@@ -1,6 +1,7 @@
 package database
 
 import (
+	"backend/internal/model"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -14,6 +15,8 @@ func Connect() *gorm.DB {
 	if err != nil {
 		log.Fatal("Failed to Connect to database: ", err)
 	}
+
+	db.AutoMigrate(&model.User{})
 
 	return db
 }

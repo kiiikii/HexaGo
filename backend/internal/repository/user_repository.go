@@ -1,18 +1,26 @@
 package repository
 
-import "fmt"
+import (
+	"backend/internal/model"
+
+	"gorm.io/gorm"
+)
 
 type UserRepository interface {
-	Create(email string, username string, password string) error
+	Create(user *model.User) error
 }
 
-type userRepository struct{}
-
-func NewUserRepository() UserRepository {
-	return &userRepository{}
+type userRepository struct {
+	db *gorm.DB
 }
 
-func (r *userRepository) Create(email string, username string, password string) error {
-	fmt.Println("Saved to Database")
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepository{db: db}
+}
+
+func (r *userRepository) Create(user *model.User) error {
+	if result := r.db.Create(user); result.Error != nil {
+		return result.Error
+	}
 	return nil
 }
