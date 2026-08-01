@@ -14,7 +14,7 @@ func main() {
 	log.Printf("Successfuly connected to database instance: %v", db)
 
 	//! Router
-	r := router.SetupRouter()
+	r := router.SetupRouter(db)
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server: ", err)
 	}
