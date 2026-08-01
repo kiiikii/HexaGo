@@ -3,6 +3,7 @@ package router
 import (
 	"backend/internal/handler"
 	"backend/internal/middleware"
+	"backend/internal/repository"
 	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -12,8 +13,11 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
 
+	//! Repository Block
+	userRepository := repository.NewUserRepository()
+
 	//! Service Block
-	userService := service.NewUserService()
+	userService := service.NewUserService(userRepository)
 
 	//! define the handler
 	pingHandler := handler.NewPingHandler()
