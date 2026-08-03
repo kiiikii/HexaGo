@@ -13,6 +13,7 @@ import (
 
 type UserService interface {
 	Register(req dto.RegisterRequestDTO) error
+	Login(req dto.LoginRequestDTO) (string, error)
 }
 
 type userService struct {
@@ -45,6 +46,21 @@ func (s *userService) Register(req dto.RegisterRequestDTO) error {
 		return fmt.Errorf("failed to save user record: %w", err)
 	}
 
-	fmt.Printf(`Processing registration in service layer for user: %s (%s)\n`, user.Username, user.Email)
+	fmt.Printf(`Successfully registered user entity: %s (%s)\n`, user.Username, user.Email)
 	return nil
+}
+
+func (s *userService) Login(req dto.LoginRequestDTO) (string, error) {
+	//! Locating User via Physical repository sequence
+	user, err := s.userRepo.FindByEmail(req.Email)
+	if err != nil {
+		return "", fmt.Errorf("User Not Found: %w", err)
+	}
+
+	//! Password Validation (plain-text against stored cryptographic hash)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return "", fmt.Errorf("Invalid Credentials: %w", err)
+	}
+
+	return "dummy-jwt-token", nil
 }
