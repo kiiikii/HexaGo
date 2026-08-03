@@ -24,6 +24,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	//! define the handler
 	pingHandler := handler.NewPingHandler()
 	authHandler := handler.NewAuthHandler(userService)
+	chatHandler := handler.NewChatHandler()
 
 	v1 := r.Group("/api/v1")
 	secure := v1.Group("/secure")
@@ -56,6 +57,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.GET("/ping", pingHandler.Ping)
 		v1.POST("/register", authHandler.Register)
 		v1.POST("/login", authHandler.Login)
+		v1.GET("/ws", chatHandler.ServeWS)
 	}
 
 	return r
