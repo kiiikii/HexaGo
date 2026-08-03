@@ -33,3 +33,21 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		"message": "Registration Successful",
 	})
 }
+
+func (h *AuthHandler) Login(c *gin.Context) {
+	var req dto.LoginRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.userService.Login(req)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
+}

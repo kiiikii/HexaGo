@@ -28,6 +28,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	{
 		v1.GET("/ping", pingHandler.Ping)
 		v1.POST("/register", authHandler.Register)
+		v1.POST("/login", authHandler.Login)
 	}
 
 	return r
