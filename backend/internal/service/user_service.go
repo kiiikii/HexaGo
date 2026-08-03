@@ -4,6 +4,7 @@ import (
 	"backend/internal/dto"
 	"backend/internal/model"
 	"backend/internal/repository"
+	"backend/internal/utils"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -62,5 +63,10 @@ func (s *userService) Login(req dto.LoginRequestDTO) (string, error) {
 		return "", fmt.Errorf("Invalid Credentials: %w", err)
 	}
 
-	return "dummy-jwt-token", nil
+	token, err := utils.GenerateToken(user.ID)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate auth token: %w", err)
+	}
+
+	return token, nil
 }
