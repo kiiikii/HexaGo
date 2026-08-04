@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"backend/internal/chat"
 	"fmt"
 	"net/http"
 
@@ -18,10 +19,14 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type ChatHandler struct{}
+type ChatHandler struct {
+	hub *chat.Hub
+}
 
-func NewChatHandler() *ChatHandler {
-	return &ChatHandler{}
+func NewChatHandler(hub *chat.Hub) *ChatHandler {
+	return &ChatHandler{
+		hub: hub,
+	}
 }
 
 func (h *ChatHandler) ServeWS(c *gin.Context) {
@@ -30,26 +35,22 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		fmt.Println("Upgrade error:", err)
 		return
 	}
-	defer conn.Close()
-	fmt.Println("Client connection successfuly")
+
+	//* Send Connection to Hub
+	h.hub.Register <- conn
+
+	defer func() {
+		h.hub.Unregister <- conn
+	}()
 
 	//* Looping for Read & Write
 	for {
 		//! Reading message
-		msgType, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Read error:", err)
 			break
 		}
-
-		//! Print Recieved Message
-		fmt.Printf("Recieved: %s\n", msg)
-
-		//! Echo Exact Message back to client
-		err = conn.WriteMessage(msgType, msg)
-		if err != nil {
-			fmt.Println("Write error:", err)
-			break
-		}
+		h.hub.Broadcast <- msg
 	}
 }

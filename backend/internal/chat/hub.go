@@ -3,18 +3,18 @@ package chat
 import "github.com/gorilla/websocket"
 
 type Hub struct {
-	clients    map[*websocket.Conn]bool
-	broadcast  chan []byte
-	register   chan *websocket.Conn
-	unregister chan *websocket.Conn
+	Clients    map[*websocket.Conn]bool
+	Broadcast  chan []byte
+	Register   chan *websocket.Conn
+	Unregister chan *websocket.Conn
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		clients:    make(map[*websocket.Conn]bool),
-		broadcast:  make(chan []byte),
-		register:   make(chan *websocket.Conn),
-		unregister: make(chan *websocket.Conn),
+		Clients:    make(map[*websocket.Conn]bool),
+		Broadcast:  make(chan []byte),
+		Register:   make(chan *websocket.Conn),
+		Unregister: make(chan *websocket.Conn),
 	}
 }
 
@@ -22,20 +22,20 @@ func (h *Hub) Run() {
 	//! Infinite loops
 	for {
 		select {
-		case client := <-h.register:
-			h.clients[client] = true
-		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
+		case client := <-h.Register:
+			h.Clients[client] = true
+		case client := <-h.Unregister:
+			if _, ok := h.Clients[client]; ok {
+				delete(h.Clients, client)
 				client.Close()
 			}
-		case message := <-h.broadcast:
+		case message := <-h.Broadcast:
 			//! Looping to send the text message
-			for client := range h.clients {
+			for client := range h.Clients {
 				err := client.WriteMessage(websocket.TextMessage, message)
 				if err != nil {
 					client.Close()
-					delete(h.clients, client)
+					delete(h.Clients, client)
 				}
 			}
 		}

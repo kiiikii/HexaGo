@@ -1,6 +1,7 @@
 package router
 
 import (
+	"backend/internal/chat"
 	"backend/internal/handler"
 	"backend/internal/middleware"
 	"backend/internal/repository"
@@ -24,7 +25,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	//! define the handler
 	pingHandler := handler.NewPingHandler()
 	authHandler := handler.NewAuthHandler(userService)
-	chatHandler := handler.NewChatHandler()
+
+	hub := chat.NewHub()
+	chatHandler := handler.NewChatHandler(hub)
+	go hub.Run()
 
 	v1 := r.Group("/api/v1")
 	secure := v1.Group("/secure")
