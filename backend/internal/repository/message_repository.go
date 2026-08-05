@@ -15,5 +15,9 @@ type messageRepository struct {
 }
 
 func NewMessageRepository(db *gorm.DB) MessageRepository {
+	return &messageRepository{db: db}
+}
+
+func (r *messageRepository) SaveMessage(msg *model.Message) error {
 	return r.db.Create(msg).Error
 }

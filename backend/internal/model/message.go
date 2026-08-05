@@ -6,7 +6,7 @@ import (
 
 type Message struct {
 	ID        string `gorm:"primaryKey"`
-	UserID    User   `gorm:"foreignKey:UserID;references:ID"`
+	UserID    string `gorm:"foreignKey:UserID;references:ID"`
 	Content   string `gorm:"not null"`
-	CreatedAr time.Time
+	CreatedAt time.Time
 }
