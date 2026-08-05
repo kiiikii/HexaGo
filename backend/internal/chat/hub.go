@@ -4,7 +4,7 @@ import "github.com/gorilla/websocket"
 
 type Hub struct {
 	Clients    map[*websocket.Conn]bool
-	Broadcast  chan []byte
+	Broadcast  chan Message
 	Register   chan *websocket.Conn
 	Unregister chan *websocket.Conn
 }
@@ -12,7 +12,7 @@ type Hub struct {
 func NewHub() *Hub {
 	return &Hub{
 		Clients:    make(map[*websocket.Conn]bool),
-		Broadcast:  make(chan []byte),
+		Broadcast:  make(chan Message),
 		Register:   make(chan *websocket.Conn),
 		Unregister: make(chan *websocket.Conn),
 	}
@@ -32,7 +32,7 @@ func (h *Hub) Run() {
 		case message := <-h.Broadcast:
 			//! Looping to send the text message
 			for client := range h.Clients {
-				err := client.WriteMessage(websocket.TextMessage, message)
+				err := client.WriteJSON(message)
 				if err != nil {
 					client.Close()
 					delete(h.Clients, client)

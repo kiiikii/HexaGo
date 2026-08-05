@@ -2,6 +2,7 @@ package handler
 
 import (
 	"backend/internal/chat"
+	"backend/internal/utils"
 	"fmt"
 	"net/http"
 
@@ -30,6 +31,15 @@ func NewChatHandler(hub *chat.Hub) *ChatHandler {
 }
 
 func (h *ChatHandler) ServeWS(c *gin.Context) {
+	tokenString := c.Query("token")
+	userID, err := utils.ValidateToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized",
+		})
+		return
+	}
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println("Upgrade error:", err)
@@ -46,11 +56,13 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 	//* Looping for Read & Write
 	for {
 		//! Reading message
-		_, msg, err := conn.ReadMessage()
+		var chatMsg chat.Message
+		err := conn.ReadJSON(&chatMsg)
 		if err != nil {
-			fmt.Println("Read error:", err)
 			break
 		}
-		h.hub.Broadcast <- msg
+		chatMsg.SenderID = userID
+
+		h.hub.Broadcast <- chatMsg
 	}
 }
