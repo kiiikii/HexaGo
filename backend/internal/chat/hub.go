@@ -1,10 +1,14 @@
 package chat
 
-import "github.com/gorilla/websocket"
+import (
+	"backend/internal/model"
+
+	"github.com/gorilla/websocket"
+)
 
 type Hub struct {
 	Clients    map[*websocket.Conn]bool
-	Broadcast  chan Message
+	Broadcast  chan model.Message
 	Register   chan *websocket.Conn
 	Unregister chan *websocket.Conn
 }
@@ -12,7 +16,7 @@ type Hub struct {
 func NewHub() *Hub {
 	return &Hub{
 		Clients:    make(map[*websocket.Conn]bool),
-		Broadcast:  make(chan Message),
+		Broadcast:  make(chan model.Message),
 		Register:   make(chan *websocket.Conn),
 		Unregister: make(chan *websocket.Conn),
 	}
