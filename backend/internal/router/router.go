@@ -18,16 +18,18 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	//! Repository Block
 	userRepository := repository.NewUserRepository(db)
+	messageRepository := repository.NewMessageRepository(db)
 
 	//! Service Block
 	userService := service.NewUserService(userRepository)
+	messageService := service.NewMessageService(messageRepository)
 
 	//! define the handler
 	pingHandler := handler.NewPingHandler()
 	authHandler := handler.NewAuthHandler(userService)
 
 	hub := chat.NewHub()
-	chatHandler := handler.NewChatHandler(hub)
+	chatHandler := handler.NewChatHandler(hub, messageService)
 	go hub.Run()
 
 	v1 := r.Group("/api/v1")

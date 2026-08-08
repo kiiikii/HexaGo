@@ -2,6 +2,7 @@ package handler
 
 import (
 	"backend/internal/chat"
+	"backend/internal/service"
 	"backend/internal/utils"
 	"fmt"
 	"net/http"
@@ -21,12 +22,14 @@ var upgrader = websocket.Upgrader{
 }
 
 type ChatHandler struct {
-	hub *chat.Hub
+	hub        *chat.Hub
+	msgService service.MessageService
 }
 
-func NewChatHandler(hub *chat.Hub) *ChatHandler {
+func NewChatHandler(hub *chat.Hub, msgService service.MessageService) *ChatHandler {
 	return &ChatHandler{
-		hub: hub,
+		hub:        hub,
+		msgService: msgService,
 	}
 }
 
@@ -62,6 +65,9 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 			break
 		}
 		chatMsg.SenderID = userID
+		if err := h.msgService.SaveMessage(userID, chatMsg.Content); err != nil {
+			fmt.Println("DB save Message Error: ", err)
+		}
 
 		h.hub.Broadcast <- chatMsg
 	}
