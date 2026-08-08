@@ -8,6 +8,7 @@ import (
 
 type MessageRepository interface {
 	SaveMessage(msg *model.Message) error
+	GetMessage(limit int) ([]model.Message, error)
 }
 
 type messageRepository struct {
@@ -15,9 +16,19 @@ type messageRepository struct {
 }
 
 func NewMessageRepository(db *gorm.DB) MessageRepository {
-	return &messageRepository{db: db}
+	return &messageRepository{
+		db: db,
+	}
 }
 
 func (r *messageRepository) SaveMessage(msg *model.Message) error {
 	return r.db.Create(msg).Error
+}
+
+func (r *messageRepository) GetMessage(limit int) ([]model.Message, error) {
+	var message []model.Message
+	if err := r.db.Preload("User").Order("created_at asc").Limit(limit).Find(&message).Error; err != nil {
+		return nil, err
+	}
+	return message, nil
 }

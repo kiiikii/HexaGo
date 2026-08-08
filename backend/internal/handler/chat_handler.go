@@ -2,6 +2,7 @@ package handler
 
 import (
 	"backend/internal/chat"
+	"backend/internal/model"
 	"backend/internal/service"
 	"backend/internal/utils"
 	"fmt"
@@ -59,12 +60,12 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 	//* Looping for Read & Write
 	for {
 		//! Reading message
-		var chatMsg chat.Message
+		var chatMsg model.Message
 		err := conn.ReadJSON(&chatMsg)
 		if err != nil {
 			break
 		}
-		chatMsg.SenderID = userID
+		chatMsg.UserID = userID
 		if err := h.msgService.SaveMessage(userID, chatMsg.Content); err != nil {
 			fmt.Println("DB save Message Error: ", err)
 		}
