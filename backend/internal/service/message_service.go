@@ -10,6 +10,7 @@ import (
 type MessageService interface {
 	SaveMessage(userID string, content string) error
 	GetMessage(limit int) ([]model.Message, error)
+	GetMessages(limit int, offset int) ([]model.Message, error)
 }
 
 type messageService struct {
@@ -38,4 +39,8 @@ func (s *messageService) SaveMessage(userID string, content string) error {
 
 func (s *messageService) GetMessage(limit int) ([]model.Message, error) {
 	return s.messageRepo.GetMessage(limit)
+}
+
+func (s *messageService) GetMessages(limit int, offset int) ([]model.Message, error) {
+	return s.messageRepo.GetMessages(limit, offset)
 }

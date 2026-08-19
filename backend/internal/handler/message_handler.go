@@ -3,6 +3,7 @@ package handler
 import (
 	"backend/internal/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,4 +24,29 @@ func (h *MessageHandler) GetMessage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": message})
+}
+
+func (h *MessageHandler) GetHistory(c *gin.Context) {
+	//! get the string from url, default 50 and 0
+	limitStr := c.DefaultQuery("limit", "50")
+	offsetStr := c.DefaultQuery("offset", "0")
+
+	//! convert string to int
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	//! Security check
+	if limit > 100 {
+		limit = 100
+	}
+
+	//! Calling the service
+	messages, err := h.messageService.GetMessages(limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	//! Returning Data
+	c.JSON(http.StatusOK, gin.H{"data": messages})
 }

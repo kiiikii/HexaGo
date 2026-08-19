@@ -60,7 +60,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			})
 		})
 
-		secure.GET("/messages", messageHandler.GetMessage)
+		secure.GET("/messages", messageHandler.GetHistory)
 	}
 	{
 		v1.GET("/ping", pingHandler.Ping)
