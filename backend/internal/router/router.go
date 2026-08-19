@@ -27,6 +27,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	//! define the handler
 	pingHandler := handler.NewPingHandler()
 	authHandler := handler.NewAuthHandler(userService)
+	messageHandler := handler.NewMessageHandler(messageService)
 
 	hub := chat.NewHub()
 	chatHandler := handler.NewChatHandler(hub, messageService)
@@ -58,6 +59,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 				"id":      userIDStr,
 			})
 		})
+
+		secure.GET("/messages", messageHandler.GetMessage)
 	}
 	{
 		v1.GET("/ping", pingHandler.Ping)
