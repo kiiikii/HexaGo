@@ -1,17 +1,25 @@
-version: '3.8'
+# version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=hexago_chat
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    restart: unless-stopped
-
+    db:
+      image: postgres:15-alpine
+      ports:
+        - "5433:5432"
+      environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=secret
+        - POSTGRES_DB=hexago_chat
+      volumes:
+        - pgdata:/var/lib/postgresql/data
+      restart: unless-stopped
+  
+    api:
+      build:
+        context: ./backend
+      ports:
+        - "8080:8080"
+      depends_on:
+        - db
+    
 volumes:
   pgdata:
