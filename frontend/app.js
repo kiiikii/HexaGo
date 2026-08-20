@@ -13,7 +13,7 @@ app.controller('MainController', function($scope, $http) {
 
   //* --- Fetching history from message endpoint
   function loadHistory() {
-    $http.get('http://localhost:8080/api/v1/secure/messages?limit=50', {
+    $http.get('http://localhost:8080/api/v1/secure/messages?limit=50&room=general', {
       //* Passing JWT
       headers: {'Authorization': 'Bearer ' + $scope.token}
     }).then(function(response) {
@@ -49,7 +49,7 @@ app.controller('MainController', function($scope, $http) {
 
   function connectWebSocket() {
     //! Open the connection using the token 
-    ws = new WebSocket(`ws://localhost:8080/api/v1/ws?token=${$scope.token}`);
+    ws = new WebSocket(`ws://localhost:8080/api/v1/ws?token=${$scope.token}&room=general`);
     ws.onopen = function() {
       console.log("WebSocket Connected");
     };

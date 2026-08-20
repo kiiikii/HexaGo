@@ -30,6 +30,7 @@ func (h *MessageHandler) GetHistory(c *gin.Context) {
 	//! get the string from url, default 50 and 0
 	limitStr := c.DefaultQuery("limit", "50")
 	offsetStr := c.DefaultQuery("offset", "0")
+	room := c.DefaultQuery("room", "general")
 
 	//! convert string to int
 	limit, _ := strconv.Atoi(limitStr)
@@ -41,7 +42,7 @@ func (h *MessageHandler) GetHistory(c *gin.Context) {
 	}
 
 	//! Calling the service
-	messages, err := h.messageService.GetMessages(limit, offset)
+	messages, err := h.messageService.GetMessages(limit, offset, room)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

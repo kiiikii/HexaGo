@@ -6,19 +6,24 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type Client struct {
+	Conn *websocket.Conn
+	Room string
+}
+
 type Hub struct {
-	Clients    map[*websocket.Conn]bool
+	Rooms      map[string]map[*Client]bool
 	Broadcast  chan model.Message
-	Register   chan *websocket.Conn
-	Unregister chan *websocket.Conn
+	Register   chan *Client
+	Unregister chan *Client
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Clients:    make(map[*websocket.Conn]bool),
+		Rooms:      make(map[string]map[*Client]bool),
 		Broadcast:  make(chan model.Message),
-		Register:   make(chan *websocket.Conn),
-		Unregister: make(chan *websocket.Conn),
+		Register:   make(chan *Client),
+		Unregister: make(chan *Client),
 	}
 }
 
@@ -27,19 +32,29 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			h.Clients[client] = true
+			if h.Rooms[client.Room] == nil {
+				h.Rooms[client.Room] = make(map[*Client]bool)
+			}
+			h.Rooms[client.Room][client] = true
+
 		case client := <-h.Unregister:
-			if _, ok := h.Clients[client]; ok {
-				delete(h.Clients, client)
-				client.Close()
+			if _, ok := h.Rooms[client.Room][client]; ok {
+				delete(h.Rooms[client.Room], client)
+				client.Conn.Close()
+
+				//! Cleaning empty Room
+				if len(h.Rooms[client.Room]) == 0 {
+					delete(h.Rooms, client.Room)
+				}
 			}
 		case message := <-h.Broadcast:
-			//! Looping to send the text message
-			for client := range h.Clients {
-				err := client.WriteJSON(message)
+			//! Only Loop Through Client in the specific room the message
+			//! Make sure a model.Message has Room Field
+			for client := range h.Rooms[message.Room] {
+				err := client.Conn.WriteJSON(message)
 				if err != nil {
-					client.Close()
-					delete(h.Clients, client)
+					client.Conn.Close()
+					delete(h.Rooms[message.Room], client)
 				}
 			}
 		}

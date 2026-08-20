@@ -44,17 +44,27 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		return
 	}
 
+	room := c.Query("room")
+	if room == "" {
+		room = "general"
+	}
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println("Upgrade error:", err)
 		return
 	}
 
+	client := &chat.Client{
+		Conn: conn,
+		Room: room,
+	}
+
 	//* Send Connection to Hub
-	h.hub.Register <- conn
+	h.hub.Register <- client
 
 	defer func() {
-		h.hub.Unregister <- conn
+		h.hub.Unregister <- client
 	}()
 
 	//* Looping for Read & Write
@@ -67,7 +77,7 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		}
 
 		// chatMsg.UserID = userID
-		savedMsg, err := h.msgService.SaveMessage(userID, chatMsg.Content)
+		savedMsg, err := h.msgService.SaveMessage(userID, chatMsg.Content, room)
 		if err != nil {
 			fmt.Println("DB save Message Error: ", err)
 			continue
