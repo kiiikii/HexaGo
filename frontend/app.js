@@ -11,6 +11,42 @@ app.controller('MainController', function($scope, $http) {
   $scope.messageContent = "";
   let ws = null;
 
+  //* --- Fetching history from message endpoint
+  function loadHistory() {
+    $http.get('http://localhost:8080/api/v1/secure/messages?limit=50', {
+      //* Passing JWT
+      headers: {'Authorization': 'Bearer ' + $scope.token}
+    }).then(function(response) {
+      //* the API Return {data: [...]}. We reverse it so oldest on the top
+      if (response.data.data) {
+        $scope.mesagges = response.data.data.reverse();
+      }
+    }, function (error) {
+      console.error("Failed to load history:", error);
+    });
+  }
+
+  //* --- Delete message
+  $scope.deleteMessage = function(messageId, index) {
+    console.log("🛠️ Attempting to delete message with ID:", messageId);
+
+    if (!messageId) {
+      console.error("❌ Cannot delete! Message ID is empty. Refresh the page first.");
+      return
+    };
+
+    $http.delete('http://localhost:8080/api/v1/secure/messages/' + messageId, {
+      headers: {'Authorization': 'Bearer ' + $scope.token}
+    }).then(function(response) {
+      console.log("✅ Message deleted in database!");
+      //! Remove it from UI
+      $scope.messages.splice(index, 1);
+    }, function(error) {
+      console.error("❌ Delete failed:", error);
+      alert("Failed to delete. Is this your message?");
+    });
+  };
+
   function connectWebSocket() {
     //! Open the connection using the token 
     ws = new WebSocket(`ws://localhost:8080/api/v1/ws?token=${$scope.token}`);
@@ -48,6 +84,8 @@ app.controller('MainController', function($scope, $http) {
       $scope.isLoggedIn = true;
       $scope.errorMessage = "";
       console.log("Logged In Successfully", $scope.token);
+
+      loadHistory();
 
       connectWebSocket();
 

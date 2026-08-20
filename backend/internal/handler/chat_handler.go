@@ -65,11 +65,14 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		if err != nil {
 			break
 		}
-		chatMsg.UserID = userID
-		if err := h.msgService.SaveMessage(userID, chatMsg.Content); err != nil {
+
+		// chatMsg.UserID = userID
+		savedMsg, err := h.msgService.SaveMessage(userID, chatMsg.Content)
+		if err != nil {
 			fmt.Println("DB save Message Error: ", err)
+			continue
 		}
 
-		h.hub.Broadcast <- chatMsg
+		h.hub.Broadcast <- *savedMsg
 	}
 }

@@ -50,3 +50,25 @@ func (h *MessageHandler) GetHistory(c *gin.Context) {
 	//! Returning Data
 	c.JSON(http.StatusOK, gin.H{"data": messages})
 }
+
+func (h *MessageHandler) DeleteMessage(c *gin.Context) {
+	messageID := c.Param("id")
+	userID, exist := c.Get("userID")
+
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user context"})
+		return
+	}
+
+	err := h.messageService.DeleteMessage(messageID, userIDStr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "Message deleted Successfully"})
+}

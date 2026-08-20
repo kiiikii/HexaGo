@@ -10,6 +10,7 @@ type MessageRepository interface {
 	SaveMessage(msg *model.Message) error
 	GetMessage(limit int) ([]model.Message, error)
 	GetMessages(limit int, offset int) ([]model.Message, error)
+	DeleteMessage(messageID string, userID string) error
 }
 
 type messageRepository struct {
@@ -40,4 +41,9 @@ func (r *messageRepository) GetMessages(limit int, offset int) ([]model.Message,
 	//! Order by latest first, preload the user struct, apply paggination limit
 	err := r.db.Preload("User").Order("created_at desc").Limit(limit).Offset(offset).Find(&messages).Error
 	return messages, err
+}
+
+func (r *messageRepository) DeleteMessage(messageID string, userID string) error {
+	//! Require both ID and UserID to match for security
+	return r.db.Where("id = ? AND user_id = ?", messageID, userID).Delete(&model.Message{}).Error
 }

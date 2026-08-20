@@ -61,6 +61,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		})
 
 		secure.GET("/messages", messageHandler.GetHistory)
+		secure.DELETE("/messages/:id", messageHandler.DeleteMessage)
 	}
 	{
 		v1.GET("/ping", pingHandler.Ping)

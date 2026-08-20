@@ -40,6 +40,23 @@
       >
         <div ng-repeat="msg in messages" style="margin-bottom: 8px">
           <strong>{{ msg.user.username || 'Captain' }}:</strong> {{ msg.content }}
+
+          <!-- NEW: The Delete Button -->
+          <button
+            ng-click="deleteMessage(msg.id, $index)"
+            style="
+              color: white;
+              background-color: red;
+              border: none;
+              border-radius: 4px;
+              font-size: 10px;
+              margin-left: 10px;
+              cursor: pointer;
+              padding: 2px 5px;
+            "
+          >
+            Delete
+          </button>
         </div>
       </div>
 
