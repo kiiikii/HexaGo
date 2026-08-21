@@ -9,23 +9,33 @@ import (
 
 var secretKey = []byte("super-secret-hexago-key")
 
-func GenerateToken(userID string) (string, error) {
-	expiredTime := time.Now().Add(24 * time.Hour)
-
-	claims := jwt.RegisteredClaims{
-		Subject:   userID,
-		ExpiresAt: jwt.NewNumericDate(expiredTime),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+func GenerateToken(userID string) (string, string, error) {
+	//! Create Access Token
+	accessTokenClaims := jwt.MapClaims{
+		"sub": userID,
+		"exp": time.Now().Add(time.Minute * 15).Unix(),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodES256, accessTokenClaims)
+	accessTokenString, err := accessToken.SignedString(secretKey)
 
-	tokens, err := token.SignedString(secretKey)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return tokens, nil
+	refreshTokenClaims := jwt.MapClaims{
+		"sub": userID,
+		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodES256, refreshTokenClaims)
+	refreshTokenString, err := refreshToken.SignedString(secretKey)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessTokenString, refreshTokenString, nil
 }
 
 func ValidateToken(tokenString string) (string, error) {

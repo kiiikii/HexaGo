@@ -14,7 +14,7 @@ import (
 
 type UserService interface {
 	Register(req dto.RegisterRequestDTO) error
-	Login(req dto.LoginRequestDTO) (string, error)
+	Login(req dto.LoginRequestDTO) (string, string, error)
 }
 
 type userService struct {
@@ -51,22 +51,22 @@ func (s *userService) Register(req dto.RegisterRequestDTO) error {
 	return nil
 }
 
-func (s *userService) Login(req dto.LoginRequestDTO) (string, error) {
+func (s *userService) Login(req dto.LoginRequestDTO) (string, string, error) {
 	//! Locating User via Physical repository sequence
 	user, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return "", fmt.Errorf("User Not Found: %w", err)
+		return "", "", fmt.Errorf("User Not Found: %w", err)
 	}
 
 	//! Password Validation (plain-text against stored cryptographic hash)
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return "", fmt.Errorf("Invalid Credentials: %w", err)
+		return "", "", fmt.Errorf("Invalid Credentials: %w", err)
 	}
 
-	token, err := utils.GenerateToken(user.ID)
+	accessToken, refreshToken, err := utils.GenerateToken(user.ID)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate auth token: %w", err)
+		return "", "", fmt.Errorf("failed to generate auth token: %w", err)
 	}
 
-	return token, nil
+	return accessToken, refreshToken, nil
 }
