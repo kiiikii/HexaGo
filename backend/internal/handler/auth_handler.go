@@ -85,3 +85,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"refresh_token": refreshToken,
 	})
 }
+
+func (h *AuthHandler) DeleteAccount(c *gin.Context) {
+	// Get user ID from the JWT middleware context
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Call the transaction service
+	err := h.userService.DeleteAccount(userID.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Account and all associated messages permanently deleted"})
+}

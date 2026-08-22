@@ -15,6 +15,7 @@ import (
 type UserService interface {
 	Register(req dto.RegisterRequestDTO) error
 	Login(req dto.LoginRequestDTO) (string, string, error)
+	DeleteAccount(userID string) error
 }
 
 type userService struct {
@@ -69,4 +70,9 @@ func (s *userService) Login(req dto.LoginRequestDTO) (string, string, error) {
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+func (s *userService) DeleteAccount(userID string) error {
+	// Simply pass the request down to the repository layer
+	return s.userRepo.DeleteAccount(userID)
 }

@@ -9,6 +9,7 @@ import (
 type UserRepository interface {
 	Create(user *model.User) error
 	FindByEmail(email string) (*model.User, error)
+	DeleteAccount(userID string) error
 }
 
 type userRepository struct {
@@ -33,4 +34,24 @@ func (r *userRepository) Create(user *model.User) error {
 		return result.Error
 	}
 	return nil
+}
+
+func (r *userRepository) DeleteAccount(userID string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		/**
+		 *! Delete All message belonging to this user
+		 *! using tx not r.db
+		 */
+		if err := tx.Where("user_id = ?", userID).Delete(&model.Message{}).Error; err != nil {
+			//! Returning an error automatically TRIGGER A ROLLBACK
+			return err
+		}
+
+		//! Delete User profile
+		if err := tx.Where("id = ?", userID).Delete(&model.User{}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

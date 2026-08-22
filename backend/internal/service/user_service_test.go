@@ -60,3 +60,8 @@ func TestRegister_DatabaseFailure(t *testing.T) {
 	assert.Contains(t, err.Error(), "database connection lost")
 	mockRepo.AssertExpectations(t)
 }
+
+func (m *MockUserRepository) DeleteAccount(userID string) error {
+	args := m.Called(userID)
+	return args.Error(0)
+}
