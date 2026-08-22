@@ -19,7 +19,7 @@ app.controller('MainController', function($scope, $http) {
     }).then(function(response) {
       //* the API Return {data: [...]}. We reverse it so oldest on the top
       if (response.data.data) {
-        $scope.mesagges = response.data.data.reverse();
+        $scope.messages = response.data.data.reverse();
       }
     }, function (error) {
       console.error("Failed to load history:", error);
@@ -80,7 +80,8 @@ app.controller('MainController', function($scope, $http) {
 
     $http.post('http://localhost:8080/api/v1/login', payload).then(function(response) {
       //* Success Grab token
-      $scope.token = response.data.token;
+      $scope.token = response.data.access_token;
+      $scope.refreshToken = response.data.refresh_token
       $scope.isLoggedIn = true;
       $scope.errorMessage = "";
       console.log("Logged In Successfully", $scope.token);

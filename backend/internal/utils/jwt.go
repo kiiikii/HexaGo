@@ -16,7 +16,7 @@ func GenerateToken(userID string) (string, string, error) {
 		"exp": time.Now().Add(time.Minute * 15).Unix(),
 	}
 
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodES256, accessTokenClaims)
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
 	accessTokenString, err := accessToken.SignedString(secretKey)
 
 	if err != nil {
@@ -28,7 +28,7 @@ func GenerateToken(userID string) (string, string, error) {
 		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
 	}
 
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodES256, refreshTokenClaims)
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
 	refreshTokenString, err := refreshToken.SignedString(secretKey)
 
 	if err != nil {

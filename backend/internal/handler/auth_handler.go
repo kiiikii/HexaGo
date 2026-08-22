@@ -4,6 +4,7 @@ import (
 	"backend/internal/dto"
 	"backend/internal/service"
 	"backend/internal/utils"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -73,6 +74,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	accessToken, refreshToken, err := h.userService.Login(req)
 	if err != nil {
+		fmt.Println("🔥 REAL LOGIN ERROR:", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
