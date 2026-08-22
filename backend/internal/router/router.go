@@ -3,6 +3,7 @@ package router
 import (
 	"backend/internal/chat"
 	"backend/internal/handler"
+	"backend/internal/logger"
 	"backend/internal/middleware"
 	"backend/internal/repository"
 	"backend/internal/service"
@@ -13,7 +14,12 @@ import (
 )
 
 func SetupRouter(db *gorm.DB) *gin.Engine {
-	r := gin.Default()
+	logger.InitLogger()
+	r := gin.New()
+
+	r.Use(middleware.RequestLogger())
+	r.Use(gin.Recovery())
+
 	r.Use(middleware.CORSMiddleware())
 
 	//! Repository Block
